@@ -117,6 +117,10 @@
     #define configIDLE_TASK_NAME    "IDLE"
 #endif
 
+/* Error codes. */
+
+#define errINPUT_OUT_OF_RANGE   ( ( uint32_t ) 1 )
+
 #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
 
 /* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 0 then task selection is
@@ -2116,12 +2120,21 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
 #if ( INCLUDE_vTaskDelay == 1 )
 
-    void vTaskDelay( const TickType_t xTicksToDelay )
+
+    /** @fn uint32_t vTaskDelay( TickType_t )
+     *  Delays the execution of the task in which this function is called in
+     *  by xTicksToDelay ticks.
+     * 
+     *  @param[in] xTicksToDelay number of ticks to delay the task by
+     *  @return The function will return 0 if successful and the expanded
+     *          value of errINPUT_OUT_OF_RANGE if not.
+     */
+    uint32_t vTaskDelay( const TickType_t xTicksToDelay )
     {
         BaseType_t xAlreadyYielded = pdFALSE;
 
         /* A delay time of zero just forces a reschedule. */
-        if( xTicksToDelay > ( TickType_t ) 0U )
+        if( xTicksToDelay > ( TickType_t ) 20U )
         {
             vTaskSuspendAll();
             {
@@ -2140,9 +2153,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             }
             xAlreadyYielded = xTaskResumeAll();
         }
-        else
+        else if ( xTicksToDelay > ( TickType_t ) 0U )
         {
-            mtCOVERAGE_TEST_MARKER();
+            return errINPUT_OUT_OF_RANGE;
         }
 
         /* Force a reschedule if xTaskResumeAll has not already done so, we may
@@ -2154,10 +2167,6 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             #else
                 vTaskYieldWithinAPI();
             #endif
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
         }
     }
 
