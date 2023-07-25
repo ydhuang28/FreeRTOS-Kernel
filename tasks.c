@@ -117,10 +117,6 @@
     #define configIDLE_TASK_NAME    "IDLE"
 #endif
 
-/* Error codes. */
-
-#define errINPUT_OUT_OF_RANGE   ( ( uint32_t ) 1 )
-
 #if ( configUSE_PORT_OPTIMISED_TASK_SELECTION == 0 )
 
 /* If configUSE_PORT_OPTIMISED_TASK_SELECTION is 0 then task selection is
@@ -2120,54 +2116,45 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
 #if ( INCLUDE_vTaskDelay == 1 )
 
-
-    /** @fn uint32_t vTaskDelay( TickType_t )
-     *  Delays the execution of the task in which this function is called in
-     *  by xTicksToDelay ticks.
-     * 
-     *  @param[in] xTicksToDelay number of ticks to delay the task by
-     *  @return The function will return 0 if successful and the expanded
-     *          value of errINPUT_OUT_OF_RANGE if not.
-     */
-    uint32_t vTaskDelay( const TickType_t xTicksToDelay )
+    int vTaskDelay( const TickType_t xTicksToDelay )
     {
-        BaseType_t xAlreadyYielded = pdFALSE;
-
-        /* A delay time of zero just forces a reschedule. */
-        if( xTicksToDelay > ( TickType_t ) 20U )
+        /* Scheduler running check. */
+        if( !xSchedulerRunning )
         {
-            vTaskSuspendAll();
+            return errSCHEDULER_NOT_RUNNING;
+        }
+        else
+        {
+            if( xTicksToDelay > ( TickType_t ) 0U )
             {
-                configASSERT( uxSchedulerSuspended == 1U );
+                vTaskSuspendAll();
+                {
+                    configASSERT( uxSchedulerSuspended == 1U );
 
-                traceTASK_DELAY();
-
-                /* A task that is removed from the event list while the
-                 * scheduler is suspended will not get placed in the ready
-                 * list or removed from the blocked list until the scheduler
-                 * is resumed.
-                 *
-                 * This task cannot be in an event list as it is the currently
-                 * executing task. */
-                prvAddCurrentTaskToDelayedList( xTicksToDelay, pdFALSE );
+                    /* A task that is removed from the event list while the
+                    * scheduler is suspended will not get placed in the ready
+                    * list or removed from the blocked list until the scheduler
+                    * is resumed.
+                    *
+                    * This task cannot be in an event list as it is the currently
+                    * executing task. */
+                    prvAddCurrentTaskToDelayedList( xTicksToDelay, pdFALSE );
+                }
+                xAlreadyYielded = xTaskResumeAll();
             }
-            xAlreadyYielded = xTaskResumeAll();
-        }
-        else if ( xTicksToDelay > ( TickType_t ) 0U )
-        {
-            return errINPUT_OUT_OF_RANGE;
+            /* A delay time of zero just forces a reschedule. */
+            else
+            {   
+                
+                #if ( configNUMBER_OF_CORES == 1 )
+                    portYIELD_WITHIN_API();
+                #else
+                    vTaskYieldWithinAPI();
+                #endif
+            }
         }
 
-        /* Force a reschedule if xTaskResumeAll has not already done so, we may
-         * have put ourselves to sleep. */
-        if( xAlreadyYielded == pdFALSE )
-        {
-            #if ( configNUMBER_OF_CORES == 1 )
-                portYIELD_WITHIN_API();
-            #else
-                vTaskYieldWithinAPI();
-            #endif
-        }
+        return errNO_ERROR;
     }
 
 #endif /* INCLUDE_vTaskDelay */

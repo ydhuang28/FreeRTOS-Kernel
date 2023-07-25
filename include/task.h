@@ -828,6 +828,11 @@ void vTaskDelete( TaskHandle_t xTaskToDelete ) PRIVILEGED_FUNCTION;
  * to facilitate fixed frequency execution.  It does this by specifying an
  * absolute time (rather than a relative time) at which the calling task should
  * unblock.
+ * 
+ * If vTaskDelay() is called with an argument of 0U (i.e., vTaskDelay( 0U )), then
+ * the behavior will be identical to that of taskYIELD(); however, it will be less
+ * efficient than taskYIELD() due to the calculation of wait time (which is unnecessary
+ * in this case since we are delaying by 0 ticks).
  *
  * @param xTicksToDelay The amount of time, in tick periods, that
  * the calling task should block.
