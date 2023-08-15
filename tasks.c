@@ -2118,10 +2118,13 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
     int vTaskDelay( const TickType_t xTicksToDelay )
     {
+
+        BaseType_t xReturnValue = errNO_ERROR;
+
         /* Scheduler running check. */
-        if( !xSchedulerRunning )
+        if( xSchedulerRunning == pdFALSE )
         {
-            return errSCHEDULER_NOT_RUNNING;
+            xReturnValue = errSCHEDULER_NOT_RUNNING;
         }
         else
         {
@@ -2140,12 +2143,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     * executing task. */
                     prvAddCurrentTaskToDelayedList( xTicksToDelay, pdFALSE );
                 }
-                xAlreadyYielded = xTaskResumeAll();
+                ( void ) xTaskResumeAll();
             }
             /* A delay time of zero just forces a reschedule. */
             else
-            {   
-                
+            {
                 #if ( configNUMBER_OF_CORES == 1 )
                     portYIELD_WITHIN_API();
                 #else
@@ -2154,7 +2156,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             }
         }
 
-        return errNO_ERROR;
+        return xReturnValue;
     }
 
 #endif /* INCLUDE_vTaskDelay */

@@ -805,7 +805,7 @@ void vTaskDelete( TaskHandle_t xTaskToDelete ) PRIVILEGED_FUNCTION;
 /**
  * task. h
  * @code{c}
- * void vTaskDelay( const TickType_t xTicksToDelay );
+ * int vTaskDelay( const TickType_t xTicksToDelay );
  * @endcode
  *
  * Delay a task for a given number of ticks.  The actual time that the
@@ -836,6 +836,7 @@ void vTaskDelete( TaskHandle_t xTaskToDelete ) PRIVILEGED_FUNCTION;
  *
  * @param xTicksToDelay The amount of time, in tick periods, that
  * the calling task should block.
+ * @return ...
  *
  * Example usage:
  *
@@ -855,7 +856,7 @@ void vTaskDelete( TaskHandle_t xTaskToDelete ) PRIVILEGED_FUNCTION;
  * \defgroup vTaskDelay vTaskDelay
  * \ingroup TaskCtrl
  */
-void vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
+int vTaskDelay( const TickType_t xTicksToDelay ) PRIVILEGED_FUNCTION;
 
 /**
  * task. h
