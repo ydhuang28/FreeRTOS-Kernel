@@ -89,6 +89,8 @@
  * \ingroup Tasks
  */
 struct tskTaskControlBlock; /* The old naming convention is used to prevent breaking kernel aware debuggers. */
+typedef struct tskTaskControlBlock tskTCB;
+typedef tskTCB TCB_t;
 typedef struct tskTaskControlBlock         * TaskHandle_t;
 typedef const struct tskTaskControlBlock   * ConstTaskHandle_t;
 
